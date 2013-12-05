@@ -31,12 +31,23 @@ class PHPCtags
 
     private $filecount;
 
+    private $mTagsDir;
+
     public function __construct($options)
     {
         $this->mParser = new PHPParser_Parser(new PHPParser_Lexer);
         $this->mLines = array();
         $this->mOptions = $options;
         $this->filecount = 0;
+        $this->setMTagsDir();
+    }
+
+    public function setMTagsDir()
+    {
+        if($this->mOptions['f'] === '-')
+            $this->mTagsDir = getcwd();
+        else
+            $this->mTagsDir = dirname(self::absolutePath($this->mOptions['f']));
     }
 
     public function setMFile($file)
@@ -67,7 +78,7 @@ class PHPCtags
     }
 
     public function setCacheFile($file) {
-        $this->cachefile = $file;
+        $this->cachefile = self::absolutePath($file);
     }
 
     public function addFiles($files)
@@ -113,6 +124,56 @@ class PHPCtags
     private static function helperSortByLine($a, $b)
     {
         return $a['line'] > $b['line'] ? 1 : 0;
+    }
+
+    private static function relativePath($from, $to)
+    {
+        $fromPath = self::absolutePath($from);
+        $toPath = self::absolutePath($to);
+
+        $fromPathParts = explode(DIRECTORY_SEPARATOR, rtrim($fromPath, DIRECTORY_SEPARATOR));
+        $toPathParts = explode(DIRECTORY_SEPARATOR, rtrim($toPath, DIRECTORY_SEPARATOR));
+        while(count($fromPathParts) && count($toPathParts) && ($fromPathParts[0] == $toPathParts[0]))
+        {
+            array_shift($fromPathParts);
+            array_shift($toPathParts);
+        }
+        return str_pad("", count($fromPathParts)*3, '..'.DIRECTORY_SEPARATOR).implode(DIRECTORY_SEPARATOR, $toPathParts);
+    }
+
+    private static function absolutePath($path)
+    {
+        $isEmptyPath    = (strlen($path) == 0);
+        $isRelativePath = ($path{0} != '/');
+        $isWindowsPath  = !(strpos($path, ':') === false);
+
+        if (($isEmptyPath || $isRelativePath) && !$isWindowsPath)
+            $path= getcwd().DIRECTORY_SEPARATOR.$path;
+
+        // resolve path parts (single dot, double dot and double delimiters)
+        $path = str_replace(array('/', '\\'), DIRECTORY_SEPARATOR, $path);
+        $pathParts = array_filter(explode(DIRECTORY_SEPARATOR, $path), 'strlen');
+        $absolutePathParts = array();
+        foreach ($pathParts as $part) {
+            if ($part == '.')
+                continue;
+
+            if ($part == '..') {
+                array_pop($absolutePathParts);
+            } else {
+                $absolutePathParts[] = $part;
+            }
+        }
+        $path = implode(DIRECTORY_SEPARATOR, $absolutePathParts);
+
+        // resolve any symlinks
+        if (file_exists($path) && linkinfo($path)>0)
+            $path = readlink($path);
+
+        // put initial separator that could have been lost
+        $path= (!$isWindowsPath ? '/'.$path : $path);
+
+        return $path;
     }
 
     private function struct($node, $reset=FALSE, $parent=array())
@@ -241,6 +302,7 @@ class PHPCtags
         if (!empty($kind) && !empty($name) && !empty($line)) {
             $structs[] = array(
                 'file' => $this->mFile,
+                'rfile' => self::relativePath($this->mTagsDir, dirname($this->mFile)) . basename($this->mFile),
                 'kind' => $kind,
                 'name' => $name,
                 'extends' => $extends,
@@ -277,7 +339,7 @@ class PHPCtags
 
             $str .= $struct['name'];
 
-            $str .= "\t" . $file;
+            $str .= "\t" . $struct['rfile'];
 
             if ($this->mOptions['excmd'] == 'number') {
                 $str .= "\t" . $struct['line'];
@@ -423,11 +485,11 @@ class PHPCtags
     private function process($file)
     {
         // Load the tag md5 data to skip unchanged files.
-        if (!isset($this->tagdata) && isset($this->cachefile) && file_exists(realpath($this->cachefile))) {
+        if (!isset($this->tagdata) && isset($this->cachefile) && file_exists($this->cachefile)) {
             if ($this->mOptions['V']) {
                 echo "Loaded cache file.\n";
             }
-            $this->tagdata = unserialize(file_get_contents(realpath($this->cachefile)));
+            $this->tagdata = unserialize(file_get_contents($this->cachefile));
         }
 
         if (is_dir($file) && isset($this->mOptions['R'])) {
