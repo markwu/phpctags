@@ -1,0 +1,15 @@
+#!/usr/bin/env php
+<?php
+namespace PHPCtags;
+
+use PHPCtags\Application;
+use PHPCtags\Command\GenerateCtagsCommand;
+
+(@include_once __DIR__ . '/../vendor/autoload.php') || @include_once __DIR__ . '/../../../autoload.php';
+
+date_default_timezone_set('UTC');
+set_time_limit(0);
+
+$command = new GenerateCtagsCommand();
+$application = new Application($command, '0.5.1');
+$application->run();
