@@ -1,14 +1,17 @@
 {
-    "name": "techlivezheng/phpctags",
+    "name": "markwu/phpctags",
     "description": "An enhanced php ctags index generator.",
     "keywords": ["ctags"],
     "type": "library",
     "require": {
-        "php": ">=5.3",
+        "php": ">=5.4",
+        "symfony/console": "2.4.*",
+        "symfony/event-dispatcher": "2.4.*",
         "nikic/php-parser": "*"
     },
     "autoload": {
-        "classmap": ["PHPCtags.class.php"]
+        "classmap": ["PHPCtags.class.php"],
+        "psr-0": { "PHPCtags": "src/" }
     },
     "bin": ["phpctags"]
 }
