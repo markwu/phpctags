@@ -30,7 +30,7 @@ class Application extends \Symfony\Component\Console\Application
     {
         // Fail if we already set up the single accessible command.
         if ($this->commandName) {
-            throw new \OverflowException("You should not add more than one command to a PHPCtags\Application instance.");
+            throw new \LogicException("You should not add more than one command to a PHPCtags\Application instance.");
         }
 
         return parent::add($command);
@@ -39,6 +39,8 @@ class Application extends \Symfony\Component\Console\Application
     public function renderException($e, $output)
     {
         $formatter = $this->getHelperSet()->get('formatter');
+        $output->writeln($this->getLongVersion());
+        $output->writeln("");
 
         do {
             $exception = get_class($e);
