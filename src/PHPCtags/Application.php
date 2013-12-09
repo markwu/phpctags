@@ -36,11 +36,18 @@ class Application extends \Symfony\Component\Console\Application
         return parent::add($command);
     }
 
-    public function renderException($e, $output)
+    public function doRun(InputInterface $input, OutputInterface $output)
     {
         $formatter = $this->getHelperSet()->get('formatter');
         $output->writeln($this->getLongVersion());
         $output->writeln("");
+
+        parent::doRun($input, $output);
+    }
+
+    public function renderException($e, $output)
+    {
+        $formatter = $this->getHelperSet()->get('formatter');
 
         do {
             $exception = get_class($e);
