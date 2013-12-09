@@ -17,7 +17,7 @@ class GenerateCtagsCommand extends Command
 
         $this->addOption('append', 'a', InputOption::VALUE_NONE, 'Append the tags to an existing tag file.');
         $this->addOption('output', 'f|o', InputOption::VALUE_REQUIRED, 'Write tags to specified file. Value of <info>"-"</info> writes tags to stdout', 'tags');
-        $this->addOption('cache', 'C', InputOption::VALUE_REQUIRED, 'Use a cache file to store tags for faster updates.', 'tags.cache');
+        $this->addOption('cache', 'C', InputOption::VALUE_REQUIRED, 'Use a cache file to store tags for faster updates.');
         $this->addOption('excmd', '', InputOption::VALUE_REQUIRED, 'Uses the specified type of EX command to locate tags. <info>[number|pattern|mix]</info>', 'mix');
         $this->addOption('exclude', '', InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'Exclude files and directories matching pattern.');
         $this->addOption('recursive', 'R', InputOption::VALUE_NONE, 'Recurse into directories supplied on command line.');
