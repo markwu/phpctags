@@ -25,7 +25,6 @@ class GenerateCtagsCommand extends Command
         $this->addOption('format', '', InputOption::VALUE_REQUIRED, 'Force output of specified tag file format.', 2);
         $this->addOption('sort', '', InputOption::VALUE_REQUIRED, 'Should tags be sorted (optionally ignoring case). <info>[yes|no|foldcase]</info>', 'yes');
         $this->addOption('memory', '', InputOption::VALUE_REQUIRED, 'Set how many memories phpctags could use. <info>[-1|bytes|KMG]</info>', ini_get('memory_limit'));
-        $this->addOption('debug', '', InputOption::VALUE_NONE, "PHPCtags only, respect PHP's error level configuration.");
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
